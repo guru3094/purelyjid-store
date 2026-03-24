@@ -25,8 +25,9 @@ export default function Footer() {
               { label: 'Collections', href: '/products' },
               { label: 'Our Story', href: '/homepage#story' },
               { label: 'Workshops', href: '/homepage#cta' },
-              { label: 'Privacy', href: '/homepage' },
-              { label: 'Terms', href: '/homepage' },
+              { label: 'Privacy Policy', href: '/privacy-policy' },
+              { label: 'Terms & Conditions', href: '/terms-and-conditions' },
+	      { label: 'Shipping Policy', href: '/shipping-policy' },
             ].map((item) => (
               <Link
                 key={item.label}
