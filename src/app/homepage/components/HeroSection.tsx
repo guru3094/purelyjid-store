@@ -144,9 +144,9 @@ export default function HeroSection() {
       <div className="relative z-10 mt-20 w-full max-w-3xl mx-auto px-6">
         <div className="glass-card rounded-2xl px-8 py-5 flex flex-wrap items-center justify-center gap-8">
           {[
-          { value: '2,400+', label: 'Happy Customers' },
-          { value: '4.9★', label: 'Average Rating' },
-          { value: '180+', label: 'Unique Designs' },
+          { value: '', label: 'Happy Customers' },
+          { value: '5★', label: 'Average Rating' },
+          { value: 'Multiple', label: 'Unique Designs' },
           { value: '100%', label: 'Handcrafted' }].
           map((stat) =>
           <div key={stat.label} className="text-center">
