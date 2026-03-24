@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'PurelyJid — Handcrafted Resin Art & Craft Supplies',
-  description: 'PurelyJid creates unique handcrafted resin art jewelry, home décor, and DIY craft supplies for gift buyers and creative enthusiasts across the US.',
+  description: 'PurelyJid creates unique handcrafted resin art jewelry, home décor, and DIY craft supplies for gift buyers and creative enthusiasts across India.',
   icons: {
     icon: [
       { url: '/favicon.ico', type: 'image/x-icon' }

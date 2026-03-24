@@ -1,27 +1,62 @@
+'use client';
+import React from 'react';
+import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import Icon from '@/components/ui/AppIcon';
+
 export default function ShippingPolicyPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-semibold mb-6">Shipping Policy</h1>
+    <main className="bg-[#FAF6F0] min-h-screen overflow-x-hidden">
+      <Header />
 
-      <p className="mb-4">
-        At PurelyJid, all our products are handcrafted with care. Orders are processed within 1–3 business days.
-      </p>
+      {/* Page Header */}
+      <section className="pt-32 pb-10 px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-center gap-2 mb-4">
+            <Link
+              href="/"
+              className="text-[11px] uppercase tracking-[0.25em] font-semibold text-muted-foreground hover:text-primary flex items-center gap-1.5"
+            >
+              <Icon name="ArrowLeftIcon" size={12} />
+              Back to Home
+            </Link>
+          </div>
 
-      <p className="mb-4">
-        Delivery typically takes 5–7 business days across India, depending on your location.
-      </p>
+          <h1 className="font-display italic text-4xl md:text-5xl font-semibold">
+            Shipping Policy
+          </h1>
+        </div>
+      </section>
 
-      <p className="mb-4">
-        Shipping charges are calculated at checkout and may vary based on order size and delivery location.
-      </p>
+      {/* Content */}
+      <section className="pb-24 px-6">
+        <div className="mx-auto max-w-4xl space-y-6 text-sm text-muted-foreground leading-relaxed">
 
-      <p className="mb-4">
-        We are not responsible for delays caused by courier partners or unforeseen circumstances.
-      </p>
+          <p>
+            All products at PurelyJid are handcrafted and made with care. Orders are processed within 1–3 business days.
+          </p>
 
-      <p>
-        For any shipping-related queries, please contact us at support@purelyjid.com.
-      </p>
-    </div>
+          <p>
+            Delivery typically takes 5–7 business days across India depending on location.
+          </p>
+
+          <p>
+            Shipping charges are calculated at checkout and may vary based on order size and delivery address.
+          </p>
+
+          <p>
+            We are not responsible for delays caused by courier partners or unforeseen circumstances.
+          </p>
+
+          <p>
+            For queries, contact us at support@purelyjid.com.
+          </p>
+
+        </div>
+      </section>
+
+      <Footer />
+    </main>
   );
 }
