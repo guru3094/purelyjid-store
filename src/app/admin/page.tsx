@@ -99,12 +99,10 @@ interface Coupon {
   discount_type: 'percentage' | 'fixed';
   discount_value: number;
   min_order_amount: number | null;
-  max_discount_amount: number | null;
-  usage_limit: number | null;
-  valid_from: string;
-  valid_until: string | null;
-  is_active: boolean;
+  max_uses: number | null;
+  used_count: number;
   expires_at: string | null;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -254,7 +252,7 @@ const STATUS_COLORS: Record<string, string> = {
   refunded: 'bg-gray-50 text-gray-700 border-gray-200',
 };
 
-const ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 const DEFAULT_STORY: StoryContent = {
   section_key: 'craft_story',
@@ -301,11 +299,10 @@ const EMPTY_COUPON = {
   discount_type: 'percentage\' as \'percentage\' | \'fixed',
   discount_value: 0,
   min_order_amount: null as number | null,
-  max_discount_amount: null as number | null,
-  usage_limit: null as number | null,
-  valid_from: '',
-  valid_until: null as string | null,
+  max_uses: null as number | null,
+  expires_at: null as string | null,
   is_active: true,
+  description: '',
 };
 
 const EMPTY_COURIER = {
@@ -407,7 +404,7 @@ export default function AdminPage() {
   const [pincodes, setPincodes] = useState<DeliveryPincode[]>([]);
   const [showPincodeModal, setShowPincodeModal] = useState(false);
   const [editingPincode, setEditingPincode] = useState<DeliveryPincode | null>(null);
-  const [pincodeForm, setPincodeForm] = useState({ pincode: '', area_name: '', city: '', state: '', is_active: true, delivery_days: 3, extra_charge: 0 });
+  const [pincodeForm, setPincodeForm] = useState({ pincode: '', area_name: '', city: '', state: '', is_active: true, delivery_days: 3, extra_charge: 0, free_shipping_above: 0 });
   const [savingPincode, setSavingPincode] = useState(false);
   const [deletingPincode, setDeletingPincode] = useState<string | null>(null);
   const [pincodeSearch, setPincodeSearch] = useState('');
@@ -634,7 +631,7 @@ export default function AdminPage() {
         short_description: row['short_description'] || '',
         price,
         original_price: row['original_price'] ? Math.round(parseFloat(row['original_price']) * 100) : null,
-        category_id: null,
+        category_id: row['category_slug'] ? (categories.find((c) => c.slug === row['category_slug'].trim())?.id ?? null) : null,
         material: row['material'] || '',
         badge: row['badge'] || null,
         badge_color: row['badge_color'] || 'bg-primary',
@@ -690,8 +687,9 @@ export default function AdminPage() {
   };
 
   const downloadCsvTemplate = () => {
-    const headers = 'name,slug,description,short_description,price,original_price,material,badge,badge_color,image_url,alt_text,sku,weight,dimensions,care_instructions,tags,in_stock,is_active,is_featured,display_order,stock_quantity,low_stock_threshold';
-    const example = 'Aurora Pendant,aurora-pendant,"Beautiful handcrafted resin pendant with aurora swirls","Handcrafted aurora resin pendant",3800,4800,Resin + Crystal,Bestseller,bg-primary,https://example.com/img.jpg,"Aurora pendant on white background",ARP-001,15g,"3 x 3 x 0.5 cm","Avoid sunlight. Clean with soft cloth.","pendant,jewelry,resin",true,true,false,1,50,5';
+    const headers = 'name,slug,description,short_description,price,original_price,category_slug,material,badge,badge_color,image_url,alt_text,sku,weight,dimensions,care_instructions,tags,in_stock,is_active,is_featured,display_order,stock_quantity,low_stock_threshold';
+    const categoryExample = categories.length > 0 ? categories[0].slug : 'jewelry';
+    const example = `Aurora Pendant,aurora-pendant,"Beautiful handcrafted resin pendant with aurora swirls","Handcrafted aurora resin pendant",3800,4800,${categoryExample},Resin + Crystal,Bestseller,bg-primary,https://example.com/img.jpg,"Aurora pendant on white background",ARP-001,15g,"3 x 3 x 0.5 cm","Avoid sunlight. Clean with soft cloth.","pendant|jewelry|resin",true,true,false,1,50,5`;
     const blob = new Blob([headers + '\n' + example], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'products_template.csv'; a.click();
@@ -1201,13 +1199,13 @@ export default function AdminPage() {
 
   const openAddPincode = () => {
     setEditingPincode(null);
-    setPincodeForm({ pincode: '', area_name: '', city: '', state: '', is_active: true, delivery_days: 3, extra_charge: 0 });
+    setPincodeForm({ pincode: '', area_name: '', city: '', state: '', is_active: true, delivery_days: 3, extra_charge: 0, free_shipping_above: 0 });
     setShowPincodeModal(true);
   };
 
   const openEditPincode = (p: DeliveryPincode) => {
     setEditingPincode(p);
-    setPincodeForm({ pincode: p.pincode, area_name: p.area_name, city: p.city, state: p.state, is_active: p.is_active, delivery_days: p.delivery_days, extra_charge: p.extra_charge });
+    setPincodeForm({ pincode: p.pincode, area_name: p.area_name, city: p.city, state: p.state, is_active: p.is_active, delivery_days: p.delivery_days, extra_charge: p.extra_charge, free_shipping_above: p.free_shipping_above ?? 0 });
     setShowPincodeModal(true);
   };
 
@@ -1836,10 +1834,11 @@ export default function AdminPage() {
                             setDeletingProduct(product.id);
                             try {
                               const supabase = createClient();
-                              await supabase.from('products').delete().eq('id', product.id);
+                              const { error } = await supabase.from('products').delete().eq('id', product.id);
+                              if (error) throw new Error(error.message);
                               setProducts((prev) => prev.filter((p) => p.id !== product.id));
                               showToast('Product deleted.', 'success');
-                            } catch { showToast('Failed to delete product.', 'error'); }
+                            } catch (err: any) { showToast(err?.message || 'Failed to delete product.', 'error'); }
                             finally { setDeletingProduct(null); }
                           }}
                           disabled={deletingProduct === product.id}
@@ -1903,6 +1902,20 @@ export default function AdminPage() {
                       <div>
                         <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Full Description</label>
                         <textarea value={(productForm as any).description || ''} onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))} rows={4} placeholder="Detailed product description..." className="w-full px-4 py-3 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary resize-none" />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Category</label>
+                        <select
+                          value={(productForm as any).category_id || ''}
+                          onChange={(e) => setProductForm((p) => ({ ...p, category_id: e.target.value || null }))}
+                          className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary"
+                        >
+                          <option value="">— No Category —</option>
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
                       </div>
 
                       <div>
@@ -2045,10 +2058,12 @@ export default function AdminPage() {
                             const slug = (productForm as any).slug || (productForm as any).name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                             const payload = { ...(productForm as any), slug, updated_at: new Date().toISOString() };
                             if (editingProduct) {
-                              await supabase.from('products').update(payload).eq('id', editingProduct.id);
+                              const { error } = await supabase.from('products').update(payload).eq('id', editingProduct.id);
+                              if (error) throw new Error(error.message);
                               showToast('Product updated.', 'success');
                             } else {
-                              await supabase.from('products').insert(payload);
+                              const { error } = await supabase.from('products').insert(payload);
+                              if (error) throw new Error(error.message);
                               showToast('Product added.', 'success');
                             }
                             setShowProductModal(false);
@@ -2086,24 +2101,9 @@ export default function AdminPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{storyContent.title}</p>
                       <p className="text-xs text-muted-foreground">{storyContent.subtitle}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${storyContent.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>{storyContent.is_active ? 'Active' : 'Hidden'}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${storyContent.in_stock ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-600'}`}>{storyContent.in_stock ? 'In Stock' : 'Out of Stock'}</span>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">{storyContent.body?.slice(0, 80)}{storyContent.body?.length > 80 ? '…' : ''}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={async () => {
-                          try {
-                            const supabase = createClient();
-                            await supabase.from('story_content').update({ is_active: !storyContent.is_active }).eq('id', storyContent.id!);
-                            setStoryContent((prev) => ({ ...prev, is_active: !prev.is_active }));
-                          } catch { showToast('Failed to update story visibility.', 'error'); }
-                        }}
-                        className="h-8 px-3 rounded-full border border-[rgba(196,120,90,0.2)] text-[10px] font-semibold text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                      >
-                        {storyContent.is_active ? 'Hide' : 'Show'}
-                      </button>
                       <button
                         onClick={() => {
                           setEditingStory(true);
@@ -2241,11 +2241,13 @@ export default function AdminPage() {
                           try {
                             const supabase = createClient();
                             if (storyForm.id) {
-                              await supabase.from('story_content').update({ ...storyForm, section_key: 'craft_story' }).eq('id', storyForm.id);
+                              const { error } = await supabase.from('story_content').update({ ...storyForm, section_key: 'craft_story', updated_at: new Date().toISOString() }).eq('id', storyForm.id);
+                              if (error) throw new Error(error.message);
                               setStoryContent(storyForm);
                             } else {
-                              const { data } = await supabase.from('story_content').insert({ ...storyForm, section_key: 'craft_story' }).single();
-                              setStoryContent(data);
+                              const { data, error } = await supabase.from('story_content').upsert({ ...storyForm, section_key: 'craft_story', updated_at: new Date().toISOString() }, { onConflict: 'section_key' }).select().single();
+                              if (error) throw new Error(error.message);
+                              if (data) setStoryContent(data);
                             }
                             showToast('Story saved.', 'success');
                             setShowStoryModal(false);
@@ -2531,8 +2533,8 @@ export default function AdminPage() {
                           {coupon.min_order_amount ? ` · Min ₹${coupon.min_order_amount / 100}` : ''}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Valid: {new Date(coupon.valid_from).toLocaleDateString('en-IN')}
-                          {coupon.valid_until ? ` – ${new Date(coupon.valid_until).toLocaleDateString('en-IN')}` : ' (no expiry)'}
+                          {coupon.expires_at ? `Expires: ${new Date(coupon.expires_at).toLocaleDateString('en-IN')}` : 'No expiry'}
+                          {coupon.max_uses ? ` · Max uses: ${coupon.max_uses}` : ''}
                         </p>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${coupon.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
@@ -2553,7 +2555,7 @@ export default function AdminPage() {
                           {coupon.is_active ? 'Disable' : 'Enable'}
                         </button>
                         <button
-                          onClick={() => { setEditingCoupon(coupon); setCouponForm({ code: coupon.code, discount_type: coupon.discount_type, discount_value: coupon.discount_value, min_order_amount: coupon.min_order_amount, max_discount_amount: coupon.max_discount_amount, usage_limit: coupon.usage_limit, valid_from: coupon.valid_from?.slice(0, 10) || '', valid_until: coupon.valid_until?.slice(0, 10) || null, is_active: coupon.is_active, description: coupon.description, expires_at: coupon.expires_at }); setShowCouponModal(true); }}
+                          onClick={() => { setEditingCoupon(coupon); setCouponForm({ code: coupon.code, discount_type: coupon.discount_type, discount_value: coupon.discount_value, min_order_amount: coupon.min_order_amount, max_uses: coupon.max_uses, expires_at: coupon.expires_at ? coupon.expires_at.slice(0, 10) : null, is_active: coupon.is_active, description: coupon.description || '' }); setShowCouponModal(true); }}
                           className="w-8 h-8 rounded-full border border-[rgba(196,120,90,0.2)] flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                         >
                           <Icon name="PencilIcon" size={12} />
@@ -2607,13 +2609,17 @@ export default function AdminPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Valid From</label>
-                          <input type="date" value={couponForm.valid_from} onChange={(e) => setCouponForm((p) => ({ ...p, valid_from: e.target.value }))} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
+                          <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Min Order Amount (₹)</label>
+                          <input type="number" min="0" value={couponForm.min_order_amount ?? ''} onChange={(e) => setCouponForm((p) => ({ ...p, min_order_amount: e.target.value ? Number(e.target.value) : null }))} placeholder="Leave blank for no minimum" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
                         </div>
                         <div>
-                          <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Valid Until</label>
-                          <input type="date" value={couponForm.valid_until || ''} onChange={(e) => setCouponForm((p) => ({ ...p, valid_until: e.target.value || null }))} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
+                          <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Max Uses</label>
+                          <input type="number" min="0" value={couponForm.max_uses ?? ''} onChange={(e) => setCouponForm((p) => ({ ...p, max_uses: e.target.value ? Number(e.target.value) : null }))} placeholder="Leave blank for unlimited" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
                         </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Expires At</label>
+                        <input type="date" value={couponForm.expires_at || ''} onChange={(e) => setCouponForm((p) => ({ ...p, expires_at: e.target.value || null }))} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
                       </div>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={couponForm.is_active} onChange={(e) => setCouponForm((p) => ({ ...p, is_active: e.target.checked }))} className="w-4 h-4 accent-primary" />
@@ -2629,12 +2635,24 @@ export default function AdminPage() {
                           setSavingCoupon(true);
                           try {
                             const supabase = createClient();
-                            const payload = { ...couponForm, updated_at: new Date().toISOString() };
+                            const payload = {
+                              code: couponForm.code,
+                              discount_type: couponForm.discount_type,
+                              discount_value: couponForm.discount_value,
+                              min_order_amount: couponForm.min_order_amount,
+                              max_uses: couponForm.max_uses,
+                              expires_at: couponForm.expires_at || null,
+                              is_active: couponForm.is_active,
+                              description: couponForm.description || '',
+                              updated_at: new Date().toISOString(),
+                            };
                             if (editingCoupon) {
-                              await supabase.from('coupons').update(payload).eq('id', editingCoupon.id);
+                              const { error } = await supabase.from('coupons').update(payload).eq('id', editingCoupon.id);
+                              if (error) throw new Error(error.message);
                               showToast('Coupon updated.', 'success');
                             } else {
-                              await supabase.from('coupons').insert(payload);
+                              const { error } = await supabase.from('coupons').insert(payload);
+                              if (error) throw new Error(error.message);
                               showToast('Coupon added.', 'success');
                             }
                             setShowCouponModal(false);
@@ -2924,16 +2942,21 @@ export default function AdminPage() {
                           try {
                             const supabase = createClient();
                             if (editingCourier) {
-                              await supabase.from('courier_partners').update({ ...courierForm, updated_at: new Date().toISOString() }).eq('id', editingCourier.id);
+                              const { error } = await supabase.from('courier_partners').update({ ...courierForm, updated_at: new Date().toISOString() }).eq('id', editingCourier.id);
+                              if (error) throw error;
                               showToast('Courier updated.', 'success');
                             } else {
-                              await supabase.from('courier_partners').insert(courierForm);
+                              const { error } = await supabase.from('courier_partners').insert(courierForm);
+                              if (error) throw error;
                               showToast('Courier added.', 'success');
                             }
                             setShowCourierModal(false);
                             fetchData();
-                          } catch (err: any) { showToast(err?.message || 'Failed to save courier.', 'error'); }
-                          finally { setSavingCourier(false); }
+                          } catch (err: any) {
+                            showToast(err?.message || 'Failed to save courier.', 'error');
+                          } finally {
+                            setSavingCourier(false);
+                          }
                         }}
                         className="h-10 px-6 rounded-full bg-foreground text-[#FAF6F0] text-xs font-semibold uppercase tracking-[0.15em] hover:bg-primary transition-colors disabled:opacity-50"
                       >
@@ -3526,7 +3549,7 @@ export default function AdminPage() {
                   className="w-full px-4 py-3 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary resize-y font-mono"
                 />
                 <div className="mt-4 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Changes here are saved for reference. Update <code className="bg-accent-cream px-1 rounded text-[11px]">src/app/shipping/page.tsx</code> to reflect on the live page.</p>
+                  <p className="text-xs text-muted-foreground">Changes are saved to the database and reflected live on the Shipping Policy page.</p>
                   <button
                     onClick={async () => {
                       setSavingShipping(true);
@@ -3568,7 +3591,7 @@ export default function AdminPage() {
                   className="w-full px-4 py-3 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary resize-y font-mono"
                 />
                 <div className="mt-4 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Changes here are saved for reference. Update <code className="bg-accent-cream px-1 rounded text-[11px]">src/app/privacy/page.tsx</code> to reflect on the live page.</p>
+                  <p className="text-xs text-muted-foreground">Changes are saved to the database and reflected live on the Privacy Policy page.</p>
                   <button
                     onClick={async () => {
                       setSavingPrivacy(true);
@@ -3610,7 +3633,7 @@ export default function AdminPage() {
                   className="w-full px-4 py-3 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary resize-y font-mono"
                 />
                 <div className="mt-4 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Changes here are saved for reference. Update <code className="bg-accent-cream px-1 rounded text-[11px]">src/app/terms/page.tsx</code> to reflect on the live page.</p>
+                  <p className="text-xs text-muted-foreground">Changes are saved to the database and reflected live on the Terms &amp; Conditions page.</p>
                   <button
                     onClick={async () => {
                       setSavingTerms(true);
@@ -3903,7 +3926,7 @@ export default function AdminPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Shipping Charge (₹)</label>
-                          <input type="number" min={0} value={zoneForm.shipping_charge / 100} onChange={(e) => setZoneForm((p) => ({ ...p, shipping_charge: Math.round(parseFloat(e.target.value || '0') * 100) }))} placeholder="0 = Free" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
+                          <input type="number" min={0} value={zoneForm.shipping_charge} onChange={(e) => setZoneForm((p) => ({ ...p, shipping_charge: Math.round(parseFloat(e.target.value || '0')) }))} placeholder="0 = Free" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
                         </div>
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Delivery Days</label>
@@ -3913,7 +3936,7 @@ export default function AdminPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Free Shipping Above (₹) — 0 = never</label>
-                          <input type="number" min={0} value={zoneForm.free_shipping_above / 100} onChange={(e) => setZoneForm((p) => ({ ...p, free_shipping_above: Math.round(parseFloat(e.target.value || '0') * 100) }))} placeholder="e.g. 1250" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
+                          <input type="number" min={0} value={zoneForm.free_shipping_above} onChange={(e) => setZoneForm((p) => ({ ...p, free_shipping_above: Math.round(parseFloat(e.target.value || '0')) }))} placeholder="e.g. 1250" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
                         </div>
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Priority (higher = checked first)</label>
