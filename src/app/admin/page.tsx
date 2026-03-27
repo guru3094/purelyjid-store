@@ -620,7 +620,7 @@ export default function AdminPage() {
       if (isNaN(price) || price <= 0) { errors.push(`Row ${i + 2}: Invalid price "${row['price']}"`); return; }
       if (!row['name']?.trim()) { errors.push(`Row ${i + 2}: Name is required`); return; }
 
-      const slug = (row['slug'] || row['name']).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      let slug = (row['slug'] || row['name']).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const tagsRaw = row['tags'] || '';
       const tags = tagsRaw ? tagsRaw.split('|').map((t: string) => t.trim()).filter(Boolean) : [];
 
@@ -653,6 +653,17 @@ export default function AdminPage() {
       });
     });
 
+    // Deduplicate slugs within the CSV batch by appending index suffix
+    const slugCount: Record<string, number> = {};
+    products.forEach((p) => {
+      if (slugCount[p.slug] === undefined) {
+        slugCount[p.slug] = 0;
+      } else {
+        slugCount[p.slug]++;
+        p.slug = `${p.slug}-${slugCount[p.slug]}`;
+      }
+    });
+
     setCsvErrors(errors);
     setCsvPreview(products);
   };
@@ -673,7 +684,22 @@ export default function AdminPage() {
     setUploadingCsv(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.from('products').insert(csvPreview.map((p) => ({ ...p, updated_at: new Date().toISOString() })));
+      // Fetch existing slugs to avoid conflicts with DB
+      const { data: existingSlugs } = await supabase.from('products').select('slug');
+      const existingSlugSet = new Set((existingSlugs || []).map((r: { slug: string }) => r.slug));
+
+      // Make each product slug unique against existing DB slugs
+      const productsToInsert = csvPreview.map((p) => {
+        let slug = p.slug;
+        if (existingSlugSet.has(slug)) {
+          const suffix = Date.now().toString(36);
+          slug = `${slug}-${suffix}`;
+        }
+        existingSlugSet.add(slug); // track within batch too
+        return { ...p, slug, updated_at: new Date().toISOString() };
+      });
+
+      const { error } = await supabase.from('products').insert(productsToInsert);
       if (error) throw error;
       showToast(`${csvPreview.length} products uploaded successfully!`, 'success');
       setCsvFile(null);
@@ -1934,12 +1960,12 @@ export default function AdminPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Price (paise) *</label>
-                          <input type="number" min="0" value={(productForm as any).price || 0} onChange={(e) => setProductForm((p) => ({ ...p, price: Number(e.target.value) }))} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm text-foreground focus:outline-none focus:border-primary" />
+                          <input type="text" inputMode="numeric" value={(productForm as any).price || 0} onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); setProductForm((p) => ({ ...p, price: val === '' ? 0 : Number(val) })); }} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm text-foreground focus:outline-none focus:border-primary" />
                           <p className="text-[10px] text-muted-foreground mt-1">₹{(((productForm as any).price || 0) / 100).toFixed(2)}</p>
                         </div>
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Original Price (paise)</label>
-                          <input type="number" min="0" value={(productForm as any).original_price || ''} onChange={(e) => setProductForm((p) => ({ ...p, original_price: e.target.value ? Number(e.target.value) : null }))} placeholder="Leave blank if no discount" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm text-foreground focus:outline-none focus:border-primary" />
+                          <input type="text" inputMode="numeric" value={(productForm as any).original_price || ''} onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); setProductForm((p) => ({ ...p, original_price: val === '' ? null : Number(val) })); }} placeholder="Leave blank if no discount" className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm text-foreground focus:outline-none focus:border-primary" />
                         </div>
                       </div>
 
@@ -2055,7 +2081,7 @@ export default function AdminPage() {
                           setSavingProduct(true);
                           try {
                             const supabase = createClient();
-                            const slug = (productForm as any).slug || (productForm as any).name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                            let slug = (productForm as any).slug || (productForm as any).name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                             const payload = { ...(productForm as any), slug, updated_at: new Date().toISOString() };
                             if (editingProduct) {
                               const { error } = await supabase.from('products').update(payload).eq('id', editingProduct.id);
@@ -2776,7 +2802,7 @@ export default function AdminPage() {
                           setSavingCategory(true);
                           try {
                             const supabase = createClient();
-                            const slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                            let slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                             const payload = { ...categoryForm, slug };
                             if (editingCategory) {
                               await supabase.from('categories').update(payload).eq('id', editingCategory.id);
@@ -3185,7 +3211,7 @@ export default function AdminPage() {
                           setSavingCategory(true);
                           try {
                             const supabase = createClient();
-                            const slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                            let slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                             const payload = { ...categoryForm, slug };
                             if (editingCategory) {
                               await supabase.from('categories').update(payload).eq('id', editingCategory.id);
@@ -3300,7 +3326,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-2">Price (paise)</label>
-                          <input type="number" min="0" value={workshopForm.price} onChange={(e) => setWorkshopForm((p) => ({ ...p, price: Number(e.target.value) }))} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
+                          <input type="text" inputMode="numeric" value={workshopForm.price} onChange={(e) => { const val = e.target.value.replace(/[^0-9]/g, ''); setWorkshopForm((p) => ({ ...p, price: val === '' ? 0 : Number(val) })); }} className="w-full h-10 px-4 rounded-xl border border-[rgba(196,120,90,0.2)] bg-[#FAF6F0] text-sm focus:outline-none focus:border-primary" />
                         </div>
                       </div>
                       <div>
