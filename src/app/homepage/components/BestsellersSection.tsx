@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 import { createClient } from '@/lib/supabase/client';
@@ -62,6 +61,14 @@ export default function BestsellersSection() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [bestsellers, setBestsellers] = useState<BestsellerProduct[]>([]);
 
+  // ✅ WhatsApp Redirect Function
+  const redirectToWhatsApp = (productName: string) => {
+    const phone = "919518770073"; // your number
+    const message = `Hi PurelyJid, I'm interested in "${productName}". Can you share more details?`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  };
+
   useEffect(() => {
     async function fetchBestsellers() {
       try {
@@ -74,13 +81,11 @@ export default function BestsellersSection() {
           .limit(8);
 
         if (error && !data) {
-          // True network/auth failure — fall back to static
           setBestsellers(STATIC_BESTSELLERS);
           return;
         }
 
         if (!data || data.length === 0) {
-          // DB reachable but no active products — show empty (no static fallback)
           setBestsellers([]);
           return;
         }
@@ -108,7 +113,6 @@ export default function BestsellersSection() {
 
     fetchBestsellers();
 
-    // Real-time subscription — refetch when products table changes
     const supabase = createClient();
     const channel = supabase
       .channel('bestsellers-realtime')
@@ -122,136 +126,73 @@ export default function BestsellersSection() {
     };
   }, []);
 
-  useEffect(() => {
-    if (bestsellers.length === 0) return;
-    const init = async () => {
-      const gsapModule = await import('gsap');
-      const stModule = await import('gsap/ScrollTrigger');
-      const gsap = gsapModule?.gsap;
-      const ScrollTrigger = stModule?.ScrollTrigger;
-      gsap?.registerPlugin(ScrollTrigger);
-
-      gsap?.fromTo('.bs-header',
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '.bs-header', start: 'top 88%' } }
-      );
-
-      if (trackRef?.current) {
-        const track = trackRef?.current;
-        const scrollWidth = track?.scrollWidth - window.innerWidth + 120;
-
-        gsap?.to(track, {
-          x: -scrollWidth,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '#bestsellers-pin',
-            start: 'top top',
-            end: () => `+=${scrollWidth}`,
-            scrub: 1.2,
-            pin: true,
-            invalidateOnRefresh: true,
-            anticipatePin: 1
-          }
-        });
-      }
-    };
-    init();
-  }, [bestsellers]);
-
   return (
     <section className="bg-[#F2EBE1]" id="bestsellers">
       <div className="pt-24 pb-10 max-w-7xl mx-auto px-6">
-        <div className="bs-header flex flex-col md:flex-row justify-between items-end gap-8 mb-12" style={{ opacity: 0 }}>
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-12">
           <div className="space-y-3">
             <p className="text-[10px] uppercase tracking-[0.5em] text-primary font-bold">Most Loved</p>
             <h2 className="font-display text-5xl md:text-7xl font-bold tracking-tighter text-foreground leading-none">
-              Bestsellers{' '}
-              <span className="font-display italic font-normal text-muted-foreground">Archives.</span>
+              Bestsellers <span className="italic text-muted-foreground">Archives.</span>
             </h2>
           </div>
-          <Link
-            href="/products"
-            className="group flex items-center gap-5 text-[11px] font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors">
-            Full Shop
-            <span className="inline-block w-10 h-px bg-primary/40 group-hover:w-16 group-hover:bg-foreground transition-all duration-500" />
-          </Link>
         </div>
       </div>
-      <div id="bestsellers-pin" className="overflow-hidden">
-        <div className="px-6 pb-24">
-          <div ref={trackRef} className="h-scroll-track gap-8">
-            {bestsellers.map((product, index) =>
-              <div
-                key={product.id}
-                className={`w-[280px] md:w-[360px] shrink-0 product-card group ${index % 2 === 1 ? 'mt-16' : ''}`}>
-                <Link href={`/products/${product.slug}`} className="block space-y-5">
-                  {/* Image */}
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-white shadow-card">
-                    <AppImage
-                      src={product.image}
-                      alt={product.alt}
-                      fill
-                      className="object-cover product-card-img saturate-[0.85] group-hover:saturate-100 transition-all duration-1000"
-                      sizes="(max-width: 768px) 280px, 360px" />
 
-                    {/* Badge */}
-                    {product.badge && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] text-white ${product.badgeColor}`}>
-                          {product.badge}
-                        </span>
-                      </div>
-                    )}
-                    {/* Quick add overlay */}
-                    <div className="product-card-overlay absolute inset-0 bg-foreground/20 backdrop-blur-[2px] flex items-end justify-center pb-6">
-                      <button className="px-6 py-3 rounded-full bg-white text-foreground text-xs font-bold uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-colors">
-                        Quick Add
-                      </button>
+      <div className="px-6 pb-24">
+        <div ref={trackRef} className="flex gap-8 overflow-x-auto">
+
+          {bestsellers.map((product, index) => (
+            <div
+              key={product.id}
+              onClick={() => redirectToWhatsApp(product.name)}
+              className={`w-[280px] md:w-[360px] cursor-pointer shrink-0 ${index % 2 === 1 ? 'mt-16' : ''}`}
+            >
+              <div className="space-y-5">
+
+                {/* Image */}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-white shadow-card">
+                  <AppImage
+                    src={product.image}
+                    alt={product.alt}
+                    fill
+                    className="object-cover"
+                  />
+
+                  {/* Badge */}
+                  {product.badge && (
+                    <div className="absolute top-3 left-3">
+                      <span className={`px-3 py-1 rounded-full text-[9px] text-white ${product.badgeColor}`}>
+                        {product.badge}
+                      </span>
                     </div>
+                  )}
+
+                  {/* Quick Add */}
+                  <div className="absolute inset-0 flex items-end justify-center pb-6">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        redirectToWhatsApp(product.name);
+                      }}
+                      className="px-6 py-3 rounded-full bg-white text-xs font-bold"
+                    >
+                      Quick Add
+                    </button>
                   </div>
+                </div>
 
-                  {/* Info */}
-                  <div className="space-y-2 px-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground">{product.category}</p>
-                        <h3 className="font-display text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
-                          {product.name}
-                        </h3>
-                      </div>
-                      <button
-                        aria-label={`Add ${product.name} to wishlist`}
-                        className="mt-1 w-8 h-8 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary hover:border-primary transition-all flex-shrink-0"
-                        onClick={(e) => e.preventDefault()}>
-                        <Icon name="HeartIcon" size={14} className="text-primary hover:text-white" />
-                      </button>
-                    </div>
+                {/* Info */}
+                <div>
+                  <p className="text-xs text-muted-foreground">{product.category}</p>
+                  <h3 className="text-lg font-bold">{product.name}</h3>
+                  <p className="text-primary font-bold">{product.price}</p>
+                </div>
 
-                    {product.reviews > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) =>
-                            <span key={i} className={i < Math.floor(product.rating) ? 'star-filled text-sm' : 'text-muted-foreground text-sm'}>
-                              ★
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">({product.reviews})</span>
-                      </div>
-                    )}
-
-                    {/* Price */}
-                    <div className="flex items-center gap-2">
-                      <span className="font-display text-xl font-bold text-primary">{product.price}</span>
-                      {product.originalPrice &&
-                        <span className="text-sm text-muted-foreground line-through">{product.originalPrice}</span>
-                      }
-                    </div>
-                  </div>
-                </Link>
               </div>
-            )}
-          </div>
+            </div>
+          ))}
+
         </div>
       </div>
     </section>
