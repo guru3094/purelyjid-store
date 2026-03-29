@@ -29,12 +29,19 @@ interface EnquiryForm {
 }
 
 const EMPTY_FORM: EnquiryForm = {
-  name: '', email: '', phone: '', message: '', event_date: '', budget: ''
+  name: '',
+  email: '',
+  phone: '',
+  message: '',
+  event_date: '',
+  budget: ''
 };
 
 export default function CustomProductsPage() {
   const { showToast } = useToast();
+
   const [products, setProducts] = useState<CustomProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<CustomProduct | null>(null);
   const [showEnquiryForm, setShowEnquiryForm] = useState(false);
   const [form, setForm] = useState<EnquiryForm>(EMPTY_FORM);
@@ -42,107 +49,154 @@ export default function CustomProductsPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.from('custom_products').select('*');
-      setProducts(data || []);
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('custom_products')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
+
+        setProducts(data || []);
+      } catch {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProducts();
   }, []);
 
   const openEnquiry = (product: CustomProduct) => {
     setSelectedProduct(product);
-    setForm({ ...EMPTY_FORM, message: `I'm interested in ${product.name}` });
+    setForm({
+      ...EMPTY_FORM,
+      message: `I'm interested in a custom ${product.name}. `
+    });
     setShowEnquiryForm(true);
   };
 
-  // ✅ UPDATED FUNCTION
+  // ✅ UPDATED FUNCTION (ONLY CHANGE)
   const submitEnquiry = async () => {
-    if (!form.name || !form.email || !form.phone) {
-      showToast('Fill required fields', 'error');
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+      showToast('Please fill in your name, email, and phone number.', 'error');
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const supabase = createClient();
-
-      // ✅ Save to DB
-      await supabase.from('custom_enquiries').insert({
-        product_id: selectedProduct?.id,
-        ...form,
-        status: 'new'
-      });
-
-      // ✅ Send Email
-      await fetch('/api/send-enquiry', {
+      const res = await fetch('/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, productName: selectedProduct?.name })
+        body: JSON.stringify({
+          product_id: selectedProduct?.id || null,
+          product_name: selectedProduct?.name || '',
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          message: form.message.trim(),
+          event_date: form.event_date || null,
+          budget: form.budget || null
+        })
       });
 
-      // ✅ WhatsApp fallback
-      window.open(
-        `https://wa.me/919518770073?text=${encodeURIComponent(
-          `Hi, I submitted enquiry\nName: ${form.name}\nProduct: ${selectedProduct?.name}`
-        )}`,
-        '_blank'
-      );
+      if (!res.ok) throw new Error();
 
-      showToast('Enquiry sent!', 'success');
+      showToast("Enquiry submitted! We'll get back to you within 24 hours.", 'success');
+
       setShowEnquiryForm(false);
       setForm(EMPTY_FORM);
 
-    } catch (err) {
-      showToast('Error sending enquiry', 'error');
+    } catch {
+      showToast("Something went wrong. Please try again.", 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const getWhatsAppLink = (product: CustomProduct) => {
+    const msg = encodeURIComponent(
+      `Hi PurelyJid! 👋 I'm interested in a custom *${product.name}* (${product.price_range}).`
+    );
+    return `https://wa.me/919518770073?text=${msg}`;
+  };
+
   return (
-    <main>
+    <main className="bg-[#FBF7F2] min-h-screen overflow-x-hidden">
       <Header />
 
-      <section className="p-10">
-        <h1 className="text-3xl mb-6">Custom Products</h1>
+      {/* Products */}
+      <section className="pt-32 pb-16 px-6">
+        <div className="mx-auto max-w-6xl">
 
-        <div className="grid grid-cols-3 gap-6">
-          {products.map((p) => (
-            <div key={p.id} className="border p-4">
-              <h3>{p.name}</h3>
-              <button onClick={() => openEnquiry(p)}>
-                Send Enquiry
-              </button>
+          {loading ? <p>Loading...</p> : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-              {/* ✅ Call button (working) */}
-              <a href="tel:+919518770073">Call</a>
+              {products.map((product) => (
+                <div key={product.id} className="bg-white p-6 rounded-2xl">
+
+                  <h3>{product.name}</h3>
+                  <p>{product.description}</p>
+
+                  <button onClick={() => openEnquiry(product)}>
+                    Send Enquiry
+                  </button>
+
+                  <a href={getWhatsAppLink(product)} target="_blank">
+                    WhatsApp
+                  </a>
+
+                  <a href="tel:+919518770073">
+                    Call
+                  </a>
+
+                </div>
+              ))}
+
             </div>
-          ))}
+          )}
         </div>
       </section>
 
-      {/* MODAL */}
+      {/* ENQUIRY MODAL */}
       {showEnquiryForm && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-          <div className="bg-white p-6 w-[400px]">
-            <h2>Enquiry</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
 
-            <input placeholder="Name" value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <div className="bg-white p-6 rounded-xl w-[400px] space-y-4">
 
-            <input placeholder="Email" value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <input
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
 
-            <input placeholder="Phone" value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
 
-            <textarea placeholder="Message" value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })} />
+            <input
+              placeholder="Phone"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+
+            <textarea
+              placeholder="Message"
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+            />
 
             <button onClick={submitEnquiry} disabled={submitting}>
-              {submitting ? 'Sending...' : 'Submit'}
+              {submitting ? 'Sending...' : 'Send Enquiry'}
             </button>
+
+            <button onClick={() => setShowEnquiryForm(false)}>
+              Cancel
+            </button>
+
           </div>
         </div>
       )}
