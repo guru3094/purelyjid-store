@@ -55,10 +55,10 @@ const STORAGE_KEY_PLACE = 'gplaces_place_id';
 const STATIC_PRODUCTS: CustomProduct[] = [
 {
   id: '1',
-  name: 'Preserved Wedding Garland',
+  name: 'Preserved Wedding Garland - Floating Frames',
   description: 'Your wedding flowers preserved forever in stunning resin art. Each piece is unique, capturing the exact blooms from your special day in a timeless keepsake.',
   category: 'Wedding Keepsakes',
-  price_range: '₹3,500 – ₹8,000',
+  price_range: '₹1399 – ₹18,000',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_1a98163c2-1772088719640.png", alt: 'Preserved wedding flowers encased in clear resin art frame with gold accents' }],
 
@@ -67,10 +67,10 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 },
 {
   id: '2',
-  name: 'Custom Resin Tray',
-  description: 'Handcrafted resin trays in your chosen colors, with dried flowers, gold foil, or personalized text. Perfect for home décor or gifting.',
-  category: 'Home Décor',
-  price_range: '₹1,200 – ₹3,500',
+  name: 'Preserved Wedding Garland - Compartment Frames',
+  description: 'Your wedding flowers preserved forever in stunning resin art. Each piece is unique, capturing the exact blooms from your special day in a timeless keepsake.',
+  category: 'Wedding Keepsakes',
+  price_range: '₹8000 – ₹17500',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_1b3b77d57-1772088720556.png", alt: 'Elegant resin serving tray with embedded dried flowers and gold leaf accents' }],
 
@@ -79,10 +79,10 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 },
 {
   id: '3',
-  name: 'Floral Resin Jewellery',
-  description: 'Wearable art — rings, pendants, and earrings with real dried flowers preserved in crystal-clear resin. Each piece is one-of-a-kind.',
-  category: 'Jewellery',
-  price_range: '₹600 – ₹2,500',
+  name: 'Couple Frames',
+  description: 'Your wedding flowers preserved forever in stunning resin art. Each piece is unique, capturing the exact blooms from your special day in a timeless keepsake.',
+  category: 'Thin Frames',
+  price_range: '₹1,399 – ₹3,699',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_1c8ebe561-1772088171432.png", alt: 'Delicate resin pendant necklace with tiny preserved pink flowers inside' }],
 
@@ -91,10 +91,10 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 },
 {
   id: '4',
-  name: 'Personalized Name Plaque',
-  description: 'Custom resin name plaques for nurseries, home entrances, or gifting. Choose your colors, fonts, and embedded elements.',
+  name: 'Wall clock',
+  description: 'Custom resin wall Clock. Choose your colors, fonts, and embedded elements.',
   category: 'Personalized Gifts',
-  price_range: '₹800 – ₹2,000',
+  price_range: '₹4,300 – ₹9,000',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_1a9c7db09-1772088172690.png", alt: 'Custom resin name sign with pastel colors and floral decorations for a nursery' }],
 
@@ -106,7 +106,7 @@ const STATIC_PRODUCTS: CustomProduct[] = [
   name: 'Resin Clock',
   description: 'Functional art for your walls — resin clocks with embedded botanicals, geodes, or custom color pours. A statement piece for any room.',
   category: 'Home Décor',
-  price_range: '₹2,500 – ₹6,000',
+  price_range: '₹4,300 – ₹9,000',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_13091368f-1772088172091.png", alt: 'Handmade resin wall clock with blue and gold geode-style pour and Roman numerals' }],
 
