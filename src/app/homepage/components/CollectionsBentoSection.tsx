@@ -10,7 +10,7 @@ const collections = [
   tag: 'Bestseller',
   tagColor: 'bg-primary text-white',
   image: "https://images.squarespace-cdn.com/content/v1/60f960aac2eb604dcfb280fa/1718445416000-NO17FLCC2O2TMD4ZUKEI/ocean-art7.jpg?format=1000w",
-  alt: 'Teal and gold ocean wave resin pendant necklace on marble surface',
+  alt: 'Teal and gold ocean wave marble surface',
   spanClass: 'bento-span-2',
   textSize: 'text-3xl md:text-4xl'
 },
@@ -27,12 +27,12 @@ const collections = [
 },
 {
   id: 3,
-  title: 'Resin Earrings',
-  subtitle: 'Accessories',
+  title: 'Varmala Preservations',
+  subtitle: 'Preserve Your Precious Varmalas',
   tag: 'Popular',
   tagColor: 'bg-accent-gold text-white',
   image: "https://img.rocket.new/generatedImages/rocket_gen_img_18dbf06a9-1772088171804.png",
-  alt: 'Colorful handmade resin drop earrings with floral inclusions',
+  alt: 'Varmala Preserved in compartmental Frame',
   spanClass: '',
   textSize: 'text-2xl'
 },
@@ -120,7 +120,13 @@ export default function CollectionsBentoSection() {
           {collections.map((col) => (
             <div
               key={col.id}
-              onClick={() => redirectToWhatsApp(col.title)}
+              onClick={() => {
+                if (col.id === 4) {
+                  window.open("https://pjresin.in", "_blank");
+                } else {
+                  redirectToWhatsApp(col.title);
+                }
+              }}
               className={`bento-item ${col.spanClass} relative overflow-hidden rounded-2xl group cursor-pointer`}
               style={{ opacity: 0, minHeight: '280px' }}
             >
