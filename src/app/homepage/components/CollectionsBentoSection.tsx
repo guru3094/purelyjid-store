@@ -5,11 +5,11 @@ import AppImage from '@/components/ui/AppImage';
 const collections = [
 {
   id: 1,
-  title: 'Ocean Wave Jewelry',
-  subtitle: 'Wearable Art',
+  title: 'Ocean Resin Art',
+  subtitle: 'Ocean Art',
   tag: 'Bestseller',
   tagColor: 'bg-primary text-white',
-  image: "https://img.rocket.new/generatedImages/rocket_gen_img_17bb190e0-1772159189121.png",
+  image: "https://images.squarespace-cdn.com/content/v1/60f960aac2eb604dcfb280fa/1718445416000-NO17FLCC2O2TMD4ZUKEI/ocean-art7.jpg?format=1000w",
   alt: 'Teal and gold ocean wave resin pendant necklace on marble surface',
   spanClass: 'bento-span-2',
   textSize: 'text-3xl md:text-4xl'
