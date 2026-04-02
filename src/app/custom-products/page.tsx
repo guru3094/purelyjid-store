@@ -104,7 +104,7 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 {
   id: '5',
   name: 'Table Top-Heart, Hexagon, Arch, Candle Holder',
-  description: 'Functional art for your home decor',
+  description: 'Functional art for your home',
   category: 'Home Décor',
   price_range: '₹799 – ₹5,175',
   images: [
