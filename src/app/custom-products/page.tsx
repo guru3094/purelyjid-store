@@ -58,7 +58,7 @@ const STATIC_PRODUCTS: CustomProduct[] = [
   name: 'Preserved Wedding Garland - Floating Frames',
   description: 'Your wedding flowers preserved forever in stunning resin art. Each piece is unique, capturing the exact blooms from your special day in a timeless keepsake.',
   category: 'Wedding Keepsakes',
-  price_range: '₹1399 – ₹18,000',
+  price_range: '₹4,500 – ₹14,000',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_1a98163c2-1772088719640.png", alt: 'Preserved wedding flowers encased in clear resin art frame with gold accents' }],
 
@@ -91,8 +91,8 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 },
 {
   id: '4',
-  name: 'Wall clock',
-  description: 'Custom resin wall Clock. Choose your colors, fonts, and embedded elements.',
+  name: 'Wall clock, Table Top, Square Lamp',
+  description: 'Custom resin wall Clock, Table Top & Square Lamp. Choose your colors, fonts, and embedded elements.',
   category: 'Personalized Gifts',
   price_range: '₹4,300 – ₹9,000',
   images: [
@@ -103,10 +103,10 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 },
 {
   id: '5',
-  name: 'Resin Clock',
-  description: 'Functional art for your walls — resin clocks with embedded botanicals, geodes, or custom color pours. A statement piece for any room.',
+  name: 'Table Top-Heart, Hexagon, Arch, Candle Holder',
+  description: 'Functional art for your home decor',
   category: 'Home Décor',
-  price_range: '₹4,300 – ₹9,000',
+  price_range: '₹799 – ₹5,175',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_13091368f-1772088172091.png", alt: 'Handmade resin wall clock with blue and gold geode-style pour and Roman numerals' }],
 
@@ -115,10 +115,10 @@ const STATIC_PRODUCTS: CustomProduct[] = [
 },
 {
   id: '6',
-  name: 'Corporate Gift Sets',
-  description: 'Bulk custom resin gifts for corporate events, employee appreciation, or client gifting. Branded with your logo or company colors.',
+  name: 'Ring/Engagement Platter',
+  description: 'Bulk custom resin Engagement Platter',
   category: 'Corporate Gifts',
-  price_range: '₹500 – ₹1,500 per piece',
+  price_range: '₹4199 per piece',
   images: [
   { url: "https://img.rocket.new/generatedImages/rocket_gen_img_1f0303e70-1772088718918.png", alt: 'Set of elegant resin paperweights and coasters in matching corporate color scheme' }],
 
