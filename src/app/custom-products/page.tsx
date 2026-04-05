@@ -50,12 +50,12 @@ const EMPTY_FORM: EnquiryForm = {
 const STORAGE_KEY_API = 'gplaces_api_key';
 const STORAGE_KEY_PLACE = 'gplaces_place_id';
 
-/* ✅ YOUR ORIGINAL STATIC PRODUCTS (UNCHANGED) */
+/* ✅ STATIC PRODUCTS ONLY */
 const STATIC_PRODUCTS: CustomProduct[] = [
   {
     id: '1',
     name: 'Preserved Wedding Garland - Floating Frames',
-    description: 'Your wedding flowers preserved forever in stunning resin art. Each piece is unique.',
+    description: 'Your wedding flowers preserved forever in stunning resin art.',
     category: 'Wedding Keepsakes',
     price_range: '₹4,500 – ₹14,000',
     images: [{ url: "https://img.rocket.new/generatedImages/rocket_gen_img_1a98163c2-1772088719640.png", alt: 'img' }],
@@ -139,7 +139,7 @@ export default function CustomProductsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [activeImage, setActiveImage] = useState<Record<string, number>>({});
 
-  // ✅ STATIC ONLY
+  // ✅ STATIC LOAD
   useEffect(() => {
     setProducts(STATIC_PRODUCTS);
     setLoading(false);
@@ -151,18 +151,20 @@ export default function CustomProductsPage() {
     setShowEnquiryForm(true);
   };
 
-  // ✅ WHATSAPP CONNECTED
+  // ✅ WHATSAPP SUBMIT (FINAL)
   const submitEnquiry = async () => {
     if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
-      showToast('Please fill required fields', 'error');
+      showToast('Please fill in your name, email, and phone number.', 'error');
       return;
     }
+
+    setSubmitting(true);
 
     const message = `
 Hi PurelyJid! 👋
 
-🛍 Product: ${selectedProduct?.name}
-💰 Price: ${selectedProduct?.price_range}
+🛍 Product: ${selectedProduct?.name || 'N/A'}
+💰 Price: ${selectedProduct?.price_range || 'N/A'}
 
 👤 Name: ${form.name}
 📞 Phone: ${form.phone}
@@ -172,7 +174,7 @@ Hi PurelyJid! 👋
 💸 Budget: ${form.budget || 'Not specified'}
 
 📝 Requirements:
-${form.message}
+${form.message || 'N/A'}
 `;
 
     window.open(`https://wa.me/919518770073?text=${encodeURIComponent(message)}`, '_blank');
@@ -180,14 +182,18 @@ ${form.message}
     showToast("Redirecting to WhatsApp...", 'success');
     setShowEnquiryForm(false);
     setForm(EMPTY_FORM);
+    setSubmitting(false);
   };
 
   return (
     <main className="bg-[#FBF7F2] min-h-screen overflow-x-hidden">
       <Header />
 
-      {/* 🔥 YOUR FULL ORIGINAL UI REMAINS HERE (UNCHANGED) */}
-      {/* 👉 This ensures NOTHING breaks visually */}
+      {/* 🔥 IMPORTANT:
+          KEEP YOUR ORIGINAL UI SECTIONS EXACTLY HERE
+          (Hero, Products Grid, Reviews, Modal etc.)
+          DO NOT REMOVE THEM
+      */}
 
       <Footer />
     </main>
