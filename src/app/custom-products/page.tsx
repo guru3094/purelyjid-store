@@ -13,7 +13,7 @@ interface CustomProduct {
   description: string;
   category: string;
   price_range: string;
-  images: { url: string; alt: string }[];
+  images: {url: string;alt: string;}[];
   catalogue_url: string | null;
   display_order: number;
 }
@@ -28,15 +28,9 @@ interface EnquiryForm {
 }
 
 const EMPTY_FORM: EnquiryForm = {
-  name: '',
-  email: '',
-  phone: '',
-  message: '',
-  event_date: '',
-  budget: ''
+  name: '', email: '', phone: '', message: '', event_date: '', budget: ''
 };
 
-// ✅ STATIC PRODUCTS
 const STATIC_PRODUCTS: CustomProduct[] = [
   {
     id: '1',
@@ -100,15 +94,14 @@ const STATIC_PRODUCTS: CustomProduct[] = [
   }
 ];
 
-function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
+function StarRating({ rating, size = 14 }: {rating: number;size?: number;}) {
   return (
     <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
+      {[1,2,3,4,5].map((star) => (
         <svg key={star} width={size} height={size} viewBox="0 0 24 24"
           fill={star <= Math.round(rating) ? '#C9963A' : 'none'}
-          stroke={star <= Math.round(rating) ? '#C9963A' : '#D1D5DB'}
-          strokeWidth="1.5">
-          <path d="M11.48 3.5l2.125 5.111 5.518.442-4.204 3.602 1.285 5.385-4.725-2.885-4.725 2.885 1.285-5.385-4.204-3.602 5.518-.442z" />
+          stroke={star <= Math.round(rating) ? '#C9963A' : '#D1D5DB'}>
+          <path d="M11.48 3.5l2.125 5.111 5.518.442-4.204 3.602 1.285 5.385-4.725-2.885-4.725 2.885 1.285-5.385-4.204-3.602 5.518-.442z"/>
         </svg>
       ))}
     </div>
@@ -117,7 +110,6 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
 
 export default function CustomProductsPage() {
   const { showToast } = useToast();
-
   const [products, setProducts] = useState<CustomProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<CustomProduct | null>(null);
@@ -126,7 +118,6 @@ export default function CustomProductsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [activeImage, setActiveImage] = useState<Record<string, number>>({});
 
-  // ✅ STATIC LOAD
   useEffect(() => {
     setProducts(STATIC_PRODUCTS);
     setLoading(false);
@@ -134,58 +125,86 @@ export default function CustomProductsPage() {
 
   const openEnquiry = (product: CustomProduct) => {
     setSelectedProduct(product);
-    setForm({ ...EMPTY_FORM, message: `I'm interested in a custom ${product.name}. ` });
+    setForm({ ...EMPTY_FORM, message: `I'm interested in ${product.name}` });
     setShowEnquiryForm(true);
   };
 
-  // ✅ WHATSAPP CONNECTED
-  const submitEnquiry = async () => {
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
-      showToast('Please fill required fields', 'error');
+  const submitEnquiry = () => {
+    if (!form.name || !form.email || !form.phone) {
+      showToast('Fill required fields', 'error');
       return;
     }
 
-    setSubmitting(true);
+    const msg = encodeURIComponent(`
+Hi PurelyJid 👋
 
-    const message = `
-Hi PurelyJid! 👋
+Product: ${selectedProduct?.name}
+Price: ${selectedProduct?.price_range}
 
-🛍 Product: ${selectedProduct?.name}
-💰 Price: ${selectedProduct?.price_range}
+Name: ${form.name}
+Phone: ${form.phone}
+Email: ${form.email}
 
-👤 Name: ${form.name}
-📞 Phone: ${form.phone}
-📧 Email: ${form.email}
+Event: ${form.event_date || 'NA'}
+Budget: ${form.budget || 'NA'}
 
-📅 Event Date: ${form.event_date || 'Not specified'}
-💸 Budget: ${form.budget || 'Not specified'}
-
-📝 Requirements:
+Message:
 ${form.message}
-`;
+`);
 
-    const url = `https://wa.me/919518770073?text=${encodeURIComponent(message)}`;
+    window.open(`https://wa.me/919518770073?text=${msg}`, '_blank');
 
-    window.open(url, '_blank');
-
-    showToast("Redirecting to WhatsApp...", 'success');
-
+    showToast('Redirecting to WhatsApp...', 'success');
     setShowEnquiryForm(false);
     setForm(EMPTY_FORM);
-    setSubmitting(false);
-  };
-
-  const getWhatsAppLink = (product: CustomProduct) => {
-    const msg = encodeURIComponent(`Hi PurelyJid! I'm interested in ${product.name}`);
-    return `https://wa.me/919518770073?text=${msg}`;
   };
 
   return (
-    <main className="bg-[#FBF7F2] min-h-screen overflow-x-hidden">
+    <main className="bg-[#FBF7F2] min-h-screen">
       <Header />
 
-      {/* KEEP YOUR EXISTING UI EXACTLY SAME BELOW */}
-      {/* No changes done to layout */}
+      {/* HERO */}
+      <section className="pt-32 pb-16 text-center">
+        <h1 className="text-5xl font-display italic">Custom Creations</h1>
+        <p className="mt-4 text-muted-foreground">Personalized resin art made for you</p>
+      </section>
+
+      {/* PRODUCTS */}
+      <section className="px-6 pb-20">
+        <div className="grid md:grid-cols-3 gap-6">
+          {products.map((p) => (
+            <div key={p.id} className="bg-white p-4 rounded-2xl">
+              <img src={p.images[0].url} className="h-48 w-full object-cover rounded-xl"/>
+              <h3 className="mt-3 font-semibold">{p.name}</h3>
+              <p className="text-sm">{p.price_range}</p>
+
+              <button
+                onClick={() => openEnquiry(p)}
+                className="mt-3 w-full bg-black text-white py-2 rounded-full">
+                Enquire
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* MODAL */}
+      {showEnquiryForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-2xl w-[400px] space-y-3">
+            <input placeholder="Name" value={form.name}
+              onChange={(e)=>setForm({...form,name:e.target.value})} className="w-full border p-2"/>
+            <input placeholder="Phone" value={form.phone}
+              onChange={(e)=>setForm({...form,phone:e.target.value})} className="w-full border p-2"/>
+            <input placeholder="Email" value={form.email}
+              onChange={(e)=>setForm({...form,email:e.target.value})} className="w-full border p-2"/>
+
+            <button onClick={submitEnquiry} className="bg-black text-white w-full py-2 rounded">
+              Send via WhatsApp
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </main>
