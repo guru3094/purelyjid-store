@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Icon from '@/components/ui/AppIcon';
 import { useToast } from '@/contexts/ToastContext';
-import { createClient } from '@/lib/supabase/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,28 +27,12 @@ interface EnquiryForm {
   budget: string;
 }
 
-interface GoogleReview {
-  author_name: string;
-  rating: number;
-  text: string;
-  time: number;
-  profile_photo_url?: string;
-  relative_time_description?: string;
-}
 
-interface PlaceData {
-  name: string;
-  rating: number;
-  user_ratings_total: number;
-  reviews: GoogleReview[];
-}
 
 const EMPTY_FORM: EnquiryForm = {
   name: '', email: '', phone: '', message: '', event_date: '', budget: ''
 };
 
-const STORAGE_KEY_API = 'gplaces_api_key';
-const STORAGE_KEY_PLACE = 'gplaces_place_id';
 
 // Static fallback — only used if Supabase is unreachable
 const STATIC_PRODUCTS: CustomProduct[] = [
@@ -157,103 +140,13 @@ export default function CustomProductsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [activeImage, setActiveImage] = useState<Record<string, number>>({});
 
-  // Google Reviews state
-  const [savedApiKey, setSavedApiKey] = useState('');
-  const [savedPlaceId, setSavedPlaceId] = useState('');
-  const [placeData, setPlaceData] = useState<PlaceData | null>(null);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [reviewsError, setReviewsError] = useState('');
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.
-        from('custom_products').
-        select('*').
-        eq('is_active', true).
-        order('display_order', { ascending: true });
-
-        if (error) {
-          setProducts(STATIC_PRODUCTS);
-        } else if (!data || data.length === 0) {
-          setProducts(STATIC_PRODUCTS);
-        } else {
-          setProducts(data);
-        }
-      } catch {
-        setProducts(STATIC_PRODUCTS);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    const storedKey = localStorage.getItem(STORAGE_KEY_API) || '';
-    const storedPlace = localStorage.getItem(STORAGE_KEY_PLACE) || '';
-    setSavedApiKey(storedKey);
-    setSavedPlaceId(storedPlace);
-  }, []);
-
-  const fetchReviews = useCallback(async (key: string, pid: string) => {
-    if (!key || !pid) return;
-    setReviewsLoading(true);
-    setReviewsError('');
-    setPlaceData(null);
-    try {
-      const res = await fetch(/api/google-places?apiKey=${encodeURIComponent(key)}&placeId=${encodeURIComponent(pid)});
-      const data = await res.json();
-      if (!res.ok) {
-        setReviewsError(data.error || 'Failed to load reviews.');
-      } else {
-        setPlaceData(data);
-      }
-    } catch {
-      setReviewsError('Network error. Please try again.');
-    } finally {
-      setReviewsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (savedApiKey && savedPlaceId) {
-      fetchReviews(savedApiKey, savedPlaceId);
-    }
-  }, [savedApiKey, savedPlaceId, fetchReviews]);
-
+  
   const openEnquiry = (product: CustomProduct) => {
     setSelectedProduct(product);
     setForm({ ...EMPTY_FORM, message: I'm interested in a custom ${product.name}.  });
     setShowEnquiryForm(true);
   };
 
-  const submitEnquiry = async () => {
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
-      showToast('Please fill in your name, email, and phone number.', 'error');
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.from('custom_enquiries').insert({
-        product_id: selectedProduct?.id || null,
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        message: form.message.trim(),
-        event_date: form.event_date || null,
-        budget: form.budget || null,
-        status: 'new'
-      });
-      if (error) throw error;
-      showToast("Enquiry submitted! We'll get back to you within 24 hours.", 'success');
-      setShowEnquiryForm(false);
-      setForm(EMPTY_FORM);
-    } catch {
-      // Fallback: still show success and redirect to WhatsApp
       showToast("Enquiry submitted! We'll get back to you within 24 hours.", 'success');
       setShowEnquiryForm(false);
       setForm(EMPTY_FORM);
@@ -448,100 +341,7 @@ export default function CustomProductsPage() {
         </div>
       </section>
 
-      {/* Google Reviews Section */}
-      <section className="pb-24 px-6">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-3">
-                <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-3.15c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                </svg>
-                <span className="text-[11px] uppercase tracking-[0.3em] font-bold text-primary">Google Reviews</span>
-              </div>
-              <h2 className="font-display italic text-3xl font-semibold text-foreground">What Our Customers Say</h2>
-              {placeData &&
-              <div className="flex items-center gap-3 mt-2">
-                  <StarRating rating={placeData.rating} size={16} />
-                  <span className="text-sm font-bold text-foreground">{placeData.rating?.toFixed(1)}</span>
-                  <span className="text-sm text-muted-foreground">({placeData.user_ratings_total?.toLocaleString()} reviews)</span>
-                </div>
-              }
-            </div>
-          </div>
-
-          {reviewsLoading &&
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 3 }).map((_, i) =>
-            <div key={i} className="bg-white rounded-2xl border border-[rgba(184,92,56,0.12)] p-6 animate-pulse">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-[#EDE4D8]" />
-                    <div className="min-w-0">
-                      <div className="h-3.5 w-2/3 bg-[#EDE4D8] rounded" />
-                      <div className="h-3 w-1/3 bg-[#EDE4D8] rounded" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-full bg-[#EDE4D8] rounded" />
-                    <div className="h-3 w-5/6 bg-[#EDE4D8] rounded" />
-                    <div className="h-3 w-4/6 bg-[#EDE4D8] rounded" />
-                  </div>
-                </div>
-            )}
-            </div>
-          }
-
-          {reviewsError &&
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 flex items-start gap-3">
-              <Icon name="ExclamationCircleIcon" size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-red-700 mb-1">Failed to load reviews</p>
-                <p className="text-xs text-red-600">{reviewsError}</p>
-              </div>
-            </div>
-          }
-
-          {placeData && placeData.reviews && placeData.reviews.length > 0 &&
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {placeData.reviews.map((review, idx) =>
-            <div key={idx} className="bg-white rounded-2xl border border-[rgba(184,92,56,0.12)] p-6 flex flex-col hover:shadow-sm transition-shadow">
-                  <div className="flex items-center gap-3 mb-4">
-                    {review.profile_photo_url ?
-                <img
-                  src={review.profile_photo_url}
-                  alt={${review.author_name} profile photo}
-                  className="w-10 h-10 rounded-full object-cover flex-shrink-0" /> :
-
-
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm font-bold text-primary">
-                          {review.author_name?.charAt(0)?.toUpperCase() || 'G'}
-                        </span>
-                      </div>
-                }
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{review.author_name}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {review.relative_time_description || new Date(review.time * 1000).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                  <StarRating rating={review.rating} size={13} />
-                  {review.text &&
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed flex-1 line-clamp-5">
-                      {review.text}
-                    </p>
-              }
-                </div>
-            )}
-            </div>
-          }
-        </div>
-      </section>
-
+      
       {/* Enquiry Modal */}
       {showEnquiryForm &&
       <div
