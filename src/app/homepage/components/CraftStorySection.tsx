@@ -206,11 +206,11 @@ export default function CraftStorySection() {
     className="text-primary group-hover:text-white transition-colors"
   />
 </div>
-<h4 className="text-[11px] uppercase tracking-[0.35em] font-semibold text-foreground mt-4">
+<h4 className="text-[10px] uppercase tracking-[0.28em] font-bold text-[#2A1F1A] mt-5">
   {item.title}
 </h4>
 
-<p className="text-sm text-muted-foreground leading-relaxed mt-2 max-w-[220px]">
+<p className="text-sm text-[#6B625C] leading-relaxed mt-2 max-w-[240px]">
   {item.desc}
 </p>
                   </div>
