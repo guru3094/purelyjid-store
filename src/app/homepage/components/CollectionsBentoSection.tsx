@@ -16,12 +16,12 @@ const collections = [
 },
 {
   id: 2,
-  title: 'Geode Coasters',
-  subtitle: 'Home Décor',
+  title: 'Resin Art Workshops',
+  subtitle: 'Workshop',
   tag: 'New',
   tagColor: 'bg-secondary text-white',
-  image: "https://img.rocket.new/generatedImages/rocket_gen_img_1dde700b1-1764988065715.png",
-  alt: 'Purple and gold geode-inspired resin coaster set on wooden table',
+  image: "https://artsshala.com/cdn/shop/articles/blog_post_45._Choosing_the_Right_Resin_Workshop_a_Guide_for_Delhi_Artists.webp?v=1702632085&width=2048",
+  alt: 'Workshop',
   spanClass: '',
   textSize: 'text-2xl'
 },
@@ -31,7 +31,7 @@ const collections = [
   subtitle: 'Preserve Your Precious Varmalas',
   tag: 'Popular',
   tagColor: 'bg-accent-gold text-white',
-  image: "https://img.rocket.new/generatedImages/rocket_gen_img_18dbf06a9-1772088171804.png",
+  image: "https://drive.google.com/file/d/1S06Osn0iYC18lGKapzVJnERqnOBbwxz_/view?usp=sharing",
   alt: 'Varmala Preserved in compartmental Frame',
   spanClass: '',
   textSize: 'text-2xl'
@@ -49,12 +49,12 @@ const collections = [
 },
 {
   id: 5,
-  title: 'Resin Bookmarks',
-  subtitle: 'Stationery',
+  title: 'Couple Resin Frames',
+  subtitle: 'Couple Frames',
   tag: 'Trending',
   tagColor: 'bg-secondary text-white',
-  image: "https://images.unsplash.com/photo-1630724947947-61397446cd1d",
-  alt: 'Delicate resin bookmarks with pressed flowers and gold leaf on open book',
+  image: "https://drive.google.com/file/d/1XNFiRa6zBfmeDjG3FQml8smt05nJJ3oo/view?usp=sharing",
+  alt: 'Couple Resin Frames',
   spanClass: '',
   textSize: 'text-2xl'
 }];
