@@ -16,7 +16,6 @@ export default function HomepagePage() {
       <HeroSection />
       <CollectionsBentoSection />
       <CraftStorySection />
-      <BestsellersSection />
       <InstagramFeedSection />
       <TestimonialsCTASection />
       <Footer />
