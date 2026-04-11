@@ -9,7 +9,7 @@ const testimonials = [
   name: 'Sumit Jadhav',
   location: 'Pune, India',
   rating: 5,
-  text: "I absolutely loved the work! 🌟 The resin clock and the illuminated wedding lamp are both extremely creative and beautifully crafted...",
+  text: "I absolutely loved the work! 🌟 The resin clock and the illuminated wedding lamp are both extremely creative and beautifully crafted. The attention to detail—right from the preserved flowers to the embedded pearls and lights—is impressive. It’s clear a lot of love and thought has gone into making these.The clock looks elegant and unique, perfect as a decor piece. And the glowing photo frame is not only visually stunning but also emotionally touching—it truly brings the memory to life! Highly recommended for anyone looking for personalized, and meaningful gifts. Excellent craftsmanship and creativity! 👏,
   avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
   product: 'Resin Wall Clock',
   verified: true
@@ -19,7 +19,7 @@ const testimonials = [
   name: 'Caroline Joseph',
   location: 'Pune, India',
   rating: 5,
-  text: "I had such a lovely experience getting the wedding garland preserved in resin...",
+  text: "I had such a lovely experience getting the wedding garland preserved in resin. The consultation felt really easy and comforting, and explaining to us about the after care. Design discussion was so nice, they even incorporated some of the changes I needed and it was done perfectly. The final process was beautiful and elegant. Definitely recommend to get your special moments preserved. Thank you so much Purely Jid 😊😃",
   avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
   product: 'Compartment Resin Varmala Frame',
   verified: true
@@ -29,7 +29,7 @@ const testimonials = [
   name: 'Neha Nagade',
   location: 'Pune, India',
   rating: 5,
-  text: "We had our wedding garlands preserved here, and the results are stunning...",
+  text: "We had our wedding garlands preserved here, and the results are stunning. She is truly the best at what she does! We are so grateful to have our wedding memories kept alive forever in such a beautiful frame. Thank you so much for this incredible keepsake.",
   avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
   product: 'Rectangle Frame',
   verified: true
@@ -39,7 +39,7 @@ const testimonials = [
   name: 'Siddharth Kolap',
   location: 'Pune, India',
   rating: 5,
-  text: "I recently got some flowers preserved here, and I’m really happy with how the final product turned out...",
+  text: "I recently got some flowers preserved here, and I’m really happy with how the final product turned out. The resin work is clean, clear, and well-finished, and the flowers have been arranged very neatly. The whole process was smooth, and they handled everything professionally and Kept me updated through every step. If you’re looking to preserve something meaningful, this place does a really good job",
   avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
   product: 'Square Frame',
   verified: true

@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 import { createClient } from '@/lib/supabase/client';
@@ -43,7 +42,7 @@ const DEFAULT_STORY: StoryContent = {
       { icon: 'SparklesIcon', title: 'Hand-Poured', desc: 'Every piece made in small batches — never mass produced.' },
       { icon: 'GlobeAltIcon', title: 'Eco Pigments', desc: 'Non-toxic, skin-safe resin and natural mineral pigments.' },
       { icon: 'HeartIcon', title: 'Gift Ready', desc: 'Arrives in a signature PurelyJid keepsake box.' },
-      { icon: 'StarIcon', title: '5-Star Studio', desc: 'Rated 4.9 across 2,400+ verified purchases.' },
+      { icon: 'StarIcon', title: '5-Star Studio', desc: 'Rated 5.0 across verified purchases.' },
     ],
   },
 };
@@ -62,10 +61,7 @@ export default function CraftStorySection() {
           .select('*')
           .eq('section_key', 'craft_story')
           .single();
-        if (error && !data) {
-          // True network failure — keep defaults
-          return;
-        }
+
         if (data) {
           setStory({
             title: data.title || DEFAULT_STORY.title,
@@ -78,14 +74,11 @@ export default function CraftStorySection() {
             extra_data: data.extra_data || DEFAULT_STORY.extra_data,
           });
         }
-      } catch {
-        // Use defaults on error
-      }
+      } catch {}
     };
 
     fetchStory();
 
-    // Real-time subscription for craft_story content
     const supabase = createClient();
     const channel = supabase
       .channel('craft-story-realtime')
@@ -165,88 +158,55 @@ export default function CraftStorySection() {
 
       <div className="mx-auto max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-12 gap-12 items-start">
-          {/* Left: Image + Quote */}
+          
+          {/* Left */}
           <div className="lg:col-span-7 relative">
-            <div ref={imgRef} className="aspect-[16/10] rounded-sm overflow-hidden shadow-warm" style={{ clipPath: 'inset(0 100% 0 0)' }}>
+            <div ref={imgRef} className="aspect-[16/10] rounded-sm overflow-hidden shadow-warm">
               <AppImage
                 src={story.image_url}
                 alt={story.image_alt}
                 fill
                 className="object-cover saturate-[0.7] sepia-[0.15] hover:saturate-100 hover:sepia-0 transition-all duration-1000"
-                sizes="(max-width: 1024px) 100vw, 60vw"
               />
             </div>
 
-            <div
-              ref={quoteRef}
-              className="absolute -bottom-12 md:-bottom-8 right-0 md:right-12 glass-card p-8 md:p-10 rounded-xl max-w-xs shadow-warm-lg"
-              style={{ opacity: 0 }}>
-              <span className="font-display italic text-5xl text-primary/10 absolute top-4 left-5 leading-none select-none">"</span>
-              <p className="font-display italic text-xl md:text-2xl text-foreground leading-snug relative z-10 pt-4">
-                &ldquo;{story.quote}&rdquo;
+            <div ref={quoteRef} className="absolute -bottom-12 md:-bottom-8 right-0 md:right-12 glass-card p-8 md:p-10 rounded-xl max-w-xs shadow-warm-lg">
+              <p className="font-display italic text-xl md:text-2xl text-foreground">
+                “{story.quote}”
               </p>
-              <div className="mt-5 flex items-center gap-3">
-                {story.extra_data?.founder_image && (
-                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                    <AppImage
-                      src={story.extra_data.founder_image}
-                      alt={story.extra_data.founder_image_alt || story.quote_author}
-                      width={32}
-                      height={32}
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs font-bold text-foreground">{story.quote_author}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{story.extra_data?.founder_title || 'Founder, PurelyJid'}</p>
-                </div>
-              </div>
+              <p className="text-xs font-bold mt-3">{story.quote_author}</p>
             </div>
           </div>
 
-          {/* Right: Story Content */}
+          {/* Right */}
           <div className="lg:col-span-5 lg:pl-10 pt-20 lg:pt-0 space-y-14">
-            <div className="space-y-6 story-reveal" style={{ opacity: 0 }}>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary font-bold flex items-center gap-3">
-                <span className="inline-block w-6 h-px bg-primary" />
+            
+            <div className="space-y-6 story-reveal">
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary font-bold">
                 {story.subtitle}
               </p>
-              <h2 className="font-display text-5xl md:text-6xl font-bold tracking-tighter leading-[0.9] text-foreground">
-                {story.title.includes('Pure Intention') ? (
-                  <>
-                    Art born from<br />
-                    <span className="font-display italic font-normal text-muted-foreground">Pure Intention.</span>
-                  </>
-                ) : story.title}
+
+              <h2 className="font-display text-5xl md:text-6xl font-bold tracking-tighter text-foreground">
+                {story.title}
               </h2>
+
               <p className="text-base text-muted-foreground leading-relaxed max-w-md">
                 {story.body}
               </p>
             </div>
 
             {features.length > 0 && (
-              <div className="grid grid-cols-2 gap-10 story-reveal" style={{ opacity: 0 }}>
+              <div className="grid grid-cols-2 gap-10 story-reveal">
                 {features.map((item) => (
-                  <div key={item.title} className="group space-y-3">
-                    <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
-                      <Icon name={item.icon as Parameters<typeof Icon>[0]['name']} size={18} className="text-primary group-hover:text-white transition-colors" />
-                    </div>
-                    <h4 className="text-[10px] uppercase tracking-[0.3em] font-bold text-foreground">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <div key={item.title}>
+                    <Icon name={item.icon as any} size={18} />
+                    <h4>{item.title}</h4>
+                    <p>{item.desc}</p>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="story-reveal" style={{ opacity: 0 }}>
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-4 px-8 py-4 rounded-full bg-foreground text-[#FAF6F0] text-xs font-bold uppercase tracking-[0.3em] hover:bg-primary transition-all duration-500 group">
-                Explore the Studio
-                <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
-              </Link>
-            </div>
           </div>
         </div>
       </div>
