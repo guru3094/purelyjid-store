@@ -56,14 +56,15 @@ export default function Header() {
           : 'bg-transparent py-5'
       }`}
     >
-      <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
-        {/* Logo */}
+      <div className="relative mx-auto max-w-7xl px-6 flex items-center justify-between">
+        
+        {/* Logo (LEFT) */}
         <Link href="/homepage" className="flex items-center gap-2 group">
           <AppLogo size={40} />
         </Link>
 
-        {/* Nav Links (UNCHANGED) */}
-        <nav className="hidden md:flex items-center gap-10">
+        {/* Nav Links (CENTERED EXACTLY) */}
+        <nav className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
           {[
             { label: 'Our Story', href: '/homepage#story' },
           ]?.map((item) => (
@@ -77,7 +78,7 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* User Menu (UNCHANGED) */}
+        {/* User Menu (RIGHT) */}
         {!loading && user && (
           <div className="relative hidden sm:block" data-user-menu>
             <button

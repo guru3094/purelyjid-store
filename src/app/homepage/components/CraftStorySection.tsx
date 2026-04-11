@@ -30,14 +30,14 @@ interface StoryContent {
 const DEFAULT_STORY: StoryContent = {
   title: 'Art born from Pure Intention.',
   subtitle: 'The Perspective',
-  body: 'PurelyJid started in a small Dallas kitchen in 2021. Jida Al-Rashid, a self-taught resin artist, began pouring her creativity into custom pieces for friends — and never stopped. Today, every item ships directly from her studio, still made by hand.',
+  body: 'PurelyJid started in Pune in 2023. Jidnyasa, a self-taught resin artist, began pouring her creativity into custom pieces — and never stopped. Today, every item ships directly from her studio, still made by hand.',
   image_url: 'https://img.rocket.new/generatedImages/rocket_gen_img_131e1516a-1771900598704.png',
   image_alt: 'Artisan hands carefully pouring tinted resin into a circular mold with gold leaf',
   quote: 'Every piece holds the exact moment I poured it — no two will ever be the same.',
-  quote_author: 'Jida Al-Rashid',
+  quote_author: 'Jidnyasa',
   extra_data: {
-    founder_image: 'https://img.rocket.new/generatedImages/rocket_gen_img_175a7bad5-1772144105475.png',
-    founder_image_alt: 'Jida, founder of PurelyJid, smiling woman with warm expression',
+    founder_image: 'https://res.cloudinary.com/dgfulodch/image/upload/v1775901472/1_ew7mfp.png',
+    founder_image_alt: 'Jidnyasa, founder of PurelyJid, smiling woman with warm expression',
     founder_title: 'Founder, PurelyJid',
     features: [
       { icon: 'SparklesIcon', title: 'Hand-Poured', desc: 'Every piece made in small batches — never mass produced.' },
