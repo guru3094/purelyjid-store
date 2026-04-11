@@ -78,8 +78,6 @@ export default function Header() {
         {/* Nav Links */}
         <nav className="hidden md:flex items-center gap-10">
           {[
-            { label: 'Custom', href: '/custom-products' },
-            { label: 'Workshops', href: '/workshops' },
             { label: 'Our Story', href: '/homepage#story' },
           ]?.map((item) => (
             <Link
