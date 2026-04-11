@@ -4,7 +4,6 @@ import Footer from '@/components/Footer';
 import HeroSection from './components/HeroSection';
 import CollectionsBentoSection from './components/CollectionsBentoSection';
 import CraftStorySection from './components/CraftStorySection';
-import BestsellersSection from './components/BestsellersSection';
 import TestimonialsCTASection from './components/TestimonialsCTASection';
 import InstagramFeedSection from './components/InstagramFeedSection';
 
