@@ -31,7 +31,7 @@ const collections = [
   subtitle: 'Preserve Your Precious Varmalas',
   tag: 'Popular',
   tagColor: 'bg-accent-gold text-white',
-  image: "https://ibb.co/kg871mVX",
+  image: "https://res.cloudinary.com/dgfulodch/image/upload/v1775896376/Vibrant_wedding_garlands_in_preservation_opb3lz.png",
   alt: 'Varmala Preserved in compartmental Frame',
   spanClass: '',
   textSize: 'text-2xl'
@@ -53,7 +53,7 @@ const collections = [
   subtitle: 'Couple Frames',
   tag: 'Trending',
   tagColor: 'bg-secondary text-white',
-  image: "https://ibb.co/rKj4hcJd",
+  image: "https://res.cloudinary.com/dgfulodch/image/upload/v1775896374/WhatsApp_Image_2024-01-02_at_9.19.39_PM_2_ayhxru.jpg",
   alt: 'Couple Resin Frames',
   spanClass: '',
   textSize: 'text-2xl'
