@@ -199,7 +199,13 @@ export default function CraftStorySection() {
               <div className="grid grid-cols-2 gap-10 story-reveal">
                 {features.map((item) => (
                   <div key={item.title}>
-                    <Icon name={item.icon as any} size={18} />
+                    <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+  <Icon
+    name={item.icon as Parameters<typeof Icon>[0]['name']}
+    size={18}
+    className="text-primary group-hover:text-white transition-colors"
+  />
+</div>
                     <h4>{item.title}</h4>
                     <p>{item.desc}</p>
                   </div>
