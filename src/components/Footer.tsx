@@ -21,10 +21,7 @@ export default function Footer() {
           {/* Center: Links */}
           <nav className="flex flex-wrap gap-x-8 gap-y-3">
             {[
-              { label: 'Shop', href: '/products' },
-              { label: 'Collections', href: '/products' },
               { label: 'Our Story', href: '/homepage#story' },
-              { label: 'Workshops', href: '/homepage#cta' },
               { label: 'Shipping', href: '/shipping' },
               { label: 'Privacy', href: '/privacy' },
               { label: 'Terms', href: '/terms' },

@@ -30,7 +30,7 @@ interface StoryContent {
 const DEFAULT_STORY: StoryContent = {
   title: 'Art born from Pure Intention.',
   subtitle: 'The Perspective',
-  body: 'PurelyJid started in Pune in 2021. Jidnyasa, a renowned resin artist from SD Academia, began pouring her creativity into custom pieces — and never stopped. Today, every item ships directly from her studio, still made by hand.',
+  body: 'PurelyJid started in Pune in 2023. Jidnyasa, a renowned resin artist from SD Academia, began pouring her creativity into custom pieces — and never stopped. Today, every item ships directly from her studio, still made by hand.',
   image_url: 'https://img.rocket.new/generatedImages/rocket_gen_img_131e1516a-1771900598704.png',
   image_alt: 'Artisan hands carefully pouring tinted resin into a circular mold with gold leaf',
   quote: 'Every piece holds the exact moment I poured it — no two will ever be the same.',
