@@ -160,7 +160,7 @@ export default function HeroSection() {
         <div className="glass-card rounded-2xl px-8 py-5 flex flex-wrap items-center justify-center gap-8">
           {[
             { value: '2,400+', label: 'Happy Customers' },
-            { value: '4.9★', label: 'Average Rating' },
+            { value: '5.0★', label: 'Average Rating' },
             { value: '180+', label: 'Unique Designs' },
             { value: '100%', label: 'Handcrafted' }
           ].map((stat) => (

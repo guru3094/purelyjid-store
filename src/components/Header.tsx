@@ -58,21 +58,26 @@ export default function Header() {
     >
       <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/homepage" className="flex items-center gap-2">
+        <Link href="/homepage" className="flex items-center gap-2 group">
           <AppLogo size={40} />
         </Link>
 
-        {/* Nav Links */}
+        {/* Nav Links (UNCHANGED) */}
         <nav className="hidden md:flex items-center gap-10">
-          <Link
-            href="/homepage#story"
-            className="text-[11px] uppercase tracking-[0.3em] font-semibold text-muted-foreground hover:text-primary transition-colors duration-300"
-          >
-            Our Story
-          </Link>
+          {[
+            { label: 'Our Story', href: '/homepage#story' },
+          ]?.map((item) => (
+            <Link
+              key={item?.label}
+              href={item?.href}
+              className="text-[11px] uppercase tracking-[0.3em] font-semibold text-muted-foreground hover:text-primary transition-colors duration-300"
+            >
+              {item?.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* User Menu */}
+        {/* User Menu (UNCHANGED) */}
         {!loading && user && (
           <div className="relative hidden sm:block" data-user-menu>
             <button
