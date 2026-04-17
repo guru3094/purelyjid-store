@@ -34,7 +34,7 @@ const DEFAULT_STORY: StoryContent = {
   image_url: 'https://img.rocket.new/generatedImages/rocket_gen_img_131e1516a-1771900598704.png',
   image_alt: 'Artisan hands carefully pouring tinted resin into a circular mold with gold leaf',
   quote: 'Every piece holds the exact moment I poured it — no two will ever be the same.',
-  quote_author: 'Jinyasa',
+  quote_author: 'Jidnyasa',
   extra_data: {
     founder_image: 'https://res.cloudinary.com/dgfulodch/image/upload/v1775901472/1_ew7mfp.png',
     founder_image_alt: 'Jidnyasa, founder of PurelyJid, smiling woman with warm expression',
